@@ -15,24 +15,24 @@ function cleanupSocket(socket) {
   if (!room) return;
 
   const isHost = room.host === userId;
-  room.users = (room.users || []).filter(user => user.userId !== userId);
+  room.users = (room.users || []).filter((user) => user.userId !== userId);
   if (room.estimations) {
     delete room.estimations[userId];
   }
 
   if (isHost) {
-    io.to(roomId).emit('roomClosed');
+    io.to(roomId).emit("roomClosed");
     delete rooms[roomId];
   } else {
-    socket.to(roomId).emit('userLeft', { userId });
+    socket.to(roomId).emit("userLeft", { userId });
     if (room.users.length === 0) {
       delete rooms[roomId];
     }
   }
 }
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
   roomController(socket);
 
@@ -40,9 +40,9 @@ io.on('connection', (socket) => {
 
   messageController(socket);
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     cleanupSocket(socket);
-    console.log('User disconnected');
+    console.log("User disconnected");
   });
 });
 
