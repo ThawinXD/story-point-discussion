@@ -26,7 +26,7 @@ export function roomController(socket) {
       rooms[roomId].host = user.id;
       rooms[roomId].estimations = {};
       rooms[roomId].cards = tempCards;
-      socket.data = { roomId, name: user.name };
+      socket.data = { roomId: roomId, name: user.name };
       socket.join(roomId);
       // socket.emit("roomCreated", { roomId });
       res({ success: true, roomId: roomId });
@@ -41,37 +41,50 @@ export function roomController(socket) {
     }
   });
 
-  socket.on("joinRoom", (user, res) => {
-    if (!validateRoomExists(socket, user.roomId)) return;
+  socket.on("joinRoom", (data, res) => {
+    if (!validateRoomExists(socket, data.roomId)) {
+      res({ success: false, error: "Room does not exist" });
+      return;
+    }
 
     try {
-      if (rooms[user.roomId].users.some((u) => u.name === user.name)) {
+      console.log("user", data.user);
+      console.log("rooms[data.roomId].users", rooms[data.roomId].users);
+      if (rooms[data.roomId].users.some((u) => u.id === data.user.id && u.name === data.user.name)) {
+        socket.emit("error", { message: "User already in room" });
+        res({ success: true, action: 1, error: "User already in room" });
+        console.log(`User ${data.user.name} already in room ${data.roomId}`);
+        return;
+      }
+
+      if (rooms[data.roomId].users.some((u) => u.name === data.user.name)) {
         socket.emit("error", {
           message: "Username already taken in this room",
         });
-        res({ success: false, error: "Username already taken in this room" });
+        res({ success: false, action: 0, error: "Username already taken in this room" });
         return;
       }
-      if (rooms[user.roomId].users.some((u) => u.id === user.id)) {
+
+      if (rooms[data.roomId].users.some((u) => u.id === data.user.id)) {
         socket.emit("error", { message: "User already in room" });
         res({ success: false, error: "User already in room" });
         return;
       }
 
       rooms[data.roomId].users.push({
-        id: data.id,
-        name: data.name,
+        id: data.user.id,
+        name: data.user.name,
       });
       socket.data = {
         roomId: data.roomId,
-        id: data.id,
-        name: data.name,
+        id: data.user.id,
+        name: data.user.name,
       };
       socket.join(data.roomId);
       socket
-        .to(user.roomId)
-        .emit("userJoined", { id: user.id, name: user.name });
-      console.log(`User ${user.name} joined room ${user.roomId}`);
+        .to(data.roomId)
+        .emit("userJoined", { id: data.user.id, name: data.user.name });
+      console.log(`User ${data.user.name} joined room ${data.roomId}`);
       res({ success: true });
     } catch (error) {
       console.error("Error joining room:", error);

@@ -8,12 +8,15 @@ export const users = new Map();
 
 export function initializeSocketHandlers(io) {
   function cleanupSocket(socket) {
-    const { roomId, userId } = socket.data || {};
+    const { roomId, userId } = { roomId: socket.data.roomId, userId: socket.id };
     if (!userId) return;
     users.delete(socket.id);
 
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room) {
+      console.log(`Room ${roomId} not found during cleanup`);
+      return;
+    }
 
     const isHost = room.host === userId;
     room.users = (room.users || []).filter((user) => user.userId !== userId);
@@ -23,6 +26,7 @@ export function initializeSocketHandlers(io) {
 
     if (isHost) {
       io.to(roomId).emit("roomClosed");
+      console.log(`Room ${roomId} closed as host disconnected`);
       delete rooms[roomId];
     } else {
       socket.to(roomId).emit("userLeft", { userId });
