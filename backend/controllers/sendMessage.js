@@ -1,4 +1,5 @@
 import { rooms } from "../io.js";
+import { io } from "../server.js";
 import { validateRoomExists } from "./common.js";
 
 export function messageController(socket) {
@@ -7,8 +8,7 @@ export function messageController(socket) {
 
     try {
       io.to(data.roomId).emit("newMessage", {
-        userId: data.userId,
-        userName: data.userName,
+        name: data.name,
         message: data.message,
       });
     } catch (error) {

@@ -9,7 +9,8 @@ export const users = new Map();
 export function initializeSocketHandlers(io) {
   function cleanupSocket(socket) {
     const { roomId, userId } = socket.data || {};
-    if (!roomId || !userId) return;
+    if (!userId) return;
+    users.delete(socket.id);
 
     const room = rooms[roomId];
     if (!room) return;
@@ -30,7 +31,6 @@ export function initializeSocketHandlers(io) {
       }
     }
 
-    users.delete(socket.id);
   }
 
   io.on("connection", (socket) => {
