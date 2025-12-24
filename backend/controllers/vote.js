@@ -1,4 +1,5 @@
-import { rooms, io } from "../io.js";
+import { rooms } from "../io.js";
+import { io } from "../server.js";
 import { validateRoomExists } from "./common.js";
 
 function result(socket, data, estimations) {
@@ -26,7 +27,7 @@ export function voteController(socket) {
 
       rooms[data.roomId].estimations = { revealed: false };
 
-      io.to(data.roomId).emit("voteStarted");
+      socket.to(data.roomId).emit("voteStarted");
       console.log(`Vote started in room ${data.roomId} by host ${data.userId}`);
     } catch (error) {
       console.error("Error in startVote:", error);
@@ -48,9 +49,9 @@ export function voteController(socket) {
       rooms[data.roomId].estimations[data.userId] = data.vote;
 
       if (!hasRevealed && !hasVoted)
-        io.to(data.roomId).emit("userVoted", { userId: data.userId });
+        socket.to(data.roomId).emit("userVoted", { userId: data.userId });
       if (hasRevealed) {
-        io.to(data.roomId).emit("changeVote", {
+        socket.to(data.roomId).emit("changeVote", {
           userId: data.userId,
           vote: data.vote,
         });
@@ -76,7 +77,7 @@ export function voteController(socket) {
       }
 
       const estimations = rooms[data.roomId].estimations;
-      io.to(data.roomId).emit("votesRevealed", { estimations });
+      socket.to(data.roomId).emit("votesRevealed", { estimations });
       rooms[data.roomId].estimations.revealed = true;
       result(socket, data, rooms[data.roomId].estimations);
       console.log(
