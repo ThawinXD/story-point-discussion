@@ -5,7 +5,7 @@ export default function TextfieldName(
 ) {
   return (
     <form
-      className="my-8"
+      className="my-4"
       onSubmit={(e) => {
         e.preventDefault();
         submitName(name);
