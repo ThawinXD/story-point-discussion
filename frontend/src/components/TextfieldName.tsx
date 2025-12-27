@@ -12,13 +12,14 @@ export default function TextfieldName(
       }}
     >
       <TextField
-        variant="outlined"
+        variant="filled"
         label="User Name"
         type="text"
         fullWidth
         margin="normal"
         sx={{
-          '& .MuiInputBase-root': { backgroundColor: 'rgb(241 245 249)' },
+          '& .MuiFilledInput-root': { backgroundColor: 'rgb(241 245 249)' },
+          '& .MuiFilledInput-root.Mui-focused': { backgroundColor: 'rgb(241 245 249)' },
         }}
         value={name}
         onChange={(e) => {

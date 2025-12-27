@@ -17,6 +17,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
   const [estimations, setEstimations] = useState<IEstimation[]>([]);
   const [voteResult, setVoteResult] = useState<[string, number][]>([]);
   const [selectCard, setSelectCard] = useState<string>("");
+  const [showEditCards, setShowEditCards] = useState<boolean>(false);
 
   const getRoomData = useCallback(() => {
     console.log("Fetching room data for roomId:", roomId);
@@ -200,6 +201,16 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
     });
   }
 
+  function handleEditCards() {
+    console.log("Edit Cards button clicked");
+    setShowEditCards(!showEditCards);
+  }
+
+  function deleteCard(card: string) {
+    console.log("Delete card:", card);
+    // Implement delete card logic here
+  }
+
   return (
     <div>
       {showSnackbar && (
@@ -232,7 +243,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
         ) : ""}
       </div>
       {user.name === host ?
-        <div className="mt-4">
+        <div className="m-4">
           <div className="gap-4">
             <Button variant="contained" color="primary" onClick={handleStartVote} className="mr-2">
               Start Vote
@@ -245,21 +256,9 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
             </Button>
           </div>
           <div className="mt-4">
-            <p>Select your card to vote:</p>
-            {roomId && cards.map((card) => (
-              <Button
-                key={card}
-                variant={selectCard === card ? "contained" : "outlined"}
-                color="primary"
-                onClick={() => {
-                  setSelectCard(card);
-                  handleVote(card);
-                }}
-                className="mr-2 mb-2"
-              >
-                {card}
-              </Button>
-            ))}
+            <Button variant="contained" color="inherit" onClick={handleEditCards}>
+              <p className="text-black">Edit Cards</p>
+            </Button>
           </div>
         </div>
         : ""
@@ -269,6 +268,10 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
         canVote={canVote}
         onSelectCard={(card: string) => {
           handleVote(card)
+        }}
+        showEditCards={showEditCards}
+        deleteCard={(card: string) => {
+          deleteCard(card);
         }}
       />
     </div>

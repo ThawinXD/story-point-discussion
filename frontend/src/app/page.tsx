@@ -16,6 +16,7 @@ export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
   const [userName, setUserName] = useState<string>("");
   const [isSocketConnected, setIsSocketConnected] = useState<boolean>(false);
+  const [showJoinRoomInput, setShowJoinRoomInput] = useState<boolean>(false);
 
   useEffect(() => {
     function onConnect() {
@@ -39,6 +40,7 @@ export default function Home() {
     }
 
     setUserName(user ? user.name || "" : "");
+    dispatch(setURL(null))
 
     return () => {
       socket.off("connect", onConnect);

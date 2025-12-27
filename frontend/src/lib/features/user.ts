@@ -37,7 +37,7 @@ const userSlice = createSlice({
     clearUser(state) {
       state.user = null;
     },
-    setURL(state, action: PayloadAction<string>) {
+    setURL(state, action: PayloadAction<string | null>) {
       state.url = action.payload;
     },
   },

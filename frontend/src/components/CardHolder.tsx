@@ -3,7 +3,7 @@ import Card from "./Card";
 
 
 export default function CardHolder(
-  { card, canVote, onSelectCard }: { card: string[]; canVote: boolean; onSelectCard: Function })
+  { card, canVote, onSelectCard, showEditCards, deleteCard }: { card: string[]; canVote: boolean; onSelectCard: Function; showEditCards: boolean; deleteCard: Function })
 {
   const [selectedCard, setSelectedCard] = useState<string>("");
 
@@ -26,6 +26,8 @@ export default function CardHolder(
             setSelectedCard(c);
             onSelectCard(c);
           }}
+          showEditCards={showEditCards}
+          deleteCard={() => deleteCard(c)}
         />
       ))}
     </div>
