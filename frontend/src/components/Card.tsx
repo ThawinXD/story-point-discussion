@@ -1,9 +1,10 @@
 "use client";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useEffect, useState } from "react";
 
 export default function Card(
-  { card, canVote, isSelected, onSelectCard, showEditCards, deleteCard }: { card: string; canVote: boolean; isSelected: boolean; onSelectCard: Function; showEditCards: boolean; deleteCard: Function }
+  { card, canVote, isSelected, onSelectCard, showEditCards, deleteCard, onChangeTextCard }: { card: string; canVote: boolean; isSelected: boolean; onSelectCard: Function; showEditCards: boolean; deleteCard: Function; onChangeTextCard: Function }
 ) {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id: card});
   const style = {
@@ -11,6 +12,18 @@ export default function Card(
     transition,
     zIndex: isDragging ? 999 : undefined,
   };
+
+  const [text, settext] = useState<string>(card);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (text !== card) {
+        onChangeTextCard(text);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [text, card, onChangeTextCard]);
 
   return (
     <div
@@ -23,12 +36,28 @@ export default function Card(
       ${isSelected ? 'scale-110 border-4 border-yellow-400' : ''}
       transform transition-all transform-3d`}
       onClick={(e) => {
-        if (!canVote) return;
         e.preventDefault();
+        if (!canVote) return;
         onSelectCard(card)}
       }>
       <div className="bg-white w-full h-full absolute top-0 left-0 flex items-center justify-center rounded-lg backface-hidden">
-        <span className="text-2xl font-bold text-black">{card}</span>
+        {showEditCards ? (
+          <input
+            type="text"
+            value={text}
+            className="text-2xl font-bold text-black text-center outline-none w-full"
+            onChange={(e) => {
+              e.defaultPrevented;
+              settext(e.target.value)
+            }}
+            onSubmit={(e) => {
+              e.defaultPrevented;
+              onChangeTextCard(text)
+            }}
+          />
+        ): (
+          <span className="text-2xl font-bold text-black">{card}</span>
+        )}
         {showEditCards && (
           <div className="absolute -top-2 -right-1">
             <button

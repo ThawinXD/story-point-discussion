@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import socket from "../socket";
 import { Snackbar, Button } from "@mui/material";
 import CardHolder from "./CardHolder";
+import Table from "./Table";
 
 export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: string | null }) {
   const [host, setHost] = useState<string>("");
@@ -87,6 +88,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       setIsRevealed(true);
     };
     const onUserVoted = (user: IRoomUser) => {
+      console.log("User voted:", user.name);
       setUsers(prev => {
         return prev.map(u =>
           u.name === user.name ? { ...u, isVoted: true } : u
@@ -189,11 +191,16 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       return;
     }
 
-    console.log(`vote card: ${card}`);
-
+    
     socket.emit("vote", { roomId, user, vote: card }, (res: IResRoom) => {
       if (res.success) {
         setSelectCard(card);
+        setUsers(prev => {
+          return prev.map(u =>
+            u.name === user.name ? { ...u, isVoted: true } : u
+          );
+        });
+        console.log(`vote card: ${card}`);
 
         if (!isRevealed) return;
         setEstimations(prev => {
@@ -207,30 +214,54 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
   }
 
   function handleEditCards() {
-    console.log("Edit Cards button clicked");
+    if (host !== user.name) {
+      alert("Only the host can edit the cards.");
+      return;
+    }
+    if (canVote || isRevealed) {
+      alert("Cannot edit cards while voting is in progress or after reveal.");
+      return;
+    }
+
     setShowEditCards(!showEditCards);
   }
 
-  function handleAddCard(card: string) {
-    console.log("Add card:", card);
-    // Implement add card logic here
+  function handleChangeTextCard(oldText: string, newText: string) {
+    if (canVote || isRevealed) {
+      alert("Cannot edit cards while voting is in progress or after reveal.");
+      return;
+    }
+    if (newText.trim() === "") {
+      alert("Card text cannot be empty.");
+      return;
+    }
+    if (cards.includes(newText)) {
+      alert("Card text must be unique.");
+      return;
+    }
+    setCards(prev => prev.map(c => (c === oldText ? newText : c)));
   }
 
-  function handleUpdateCard(cards: string[]) {
-    console.log("Update cards:", cards);
 
+  function handleUpdateCard(cards: string[]) {
+    
     socket.emit("updateCards", { roomId, cards }, (res: IResRoom) => {
       if (res.success) {
+        console.log("Update cards:", cards);
         setCards(cards);
       } else {
         console.error("Error updating cards:", res.error);
+        socket.emit("getCards", { roomId }, (res: { success: boolean; cards?: string[]; error?: string }) => {
+          if (res.success && res.cards) {
+            setCards(res.cards);
+          } else {
+            console.error("Error fetching cards:", res.error);
+          }
+        });
       }
     });
-  }
 
-  function deleteCard(card: string) {
-    console.log("Delete card:", card);
-    // Implement delete card logic here
+    setShowEditCards(false);
   }
 
   return (
@@ -264,6 +295,14 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
           </div>
         ) : ""}
       </div>
+      <Table
+        users={users}
+        estimations={estimations}
+        isRevealed={isRevealed}
+        voteResult={voteResult}
+        host={host}
+        user={user}
+      />
       {user.name === host ?
         <div className="m-4">
           <div className="gap-4">
@@ -292,9 +331,8 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
           handleVote(card)
         }}
         showEditCards={showEditCards}
-        deleteCard={(card: string) => {
-          deleteCard(card);
-        }}
+        onChangeTextCard={handleChangeTextCard}
+        updateCards={handleUpdateCard}
       />
     </div>
   );
