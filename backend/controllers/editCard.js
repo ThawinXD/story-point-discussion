@@ -13,7 +13,8 @@ export function cardController(socket) {
         return;
       }
       
-      console.log("Updating cards:", data.cards);
+      // console.log("Updating cards:", data.cards);
+      console.log("Updating cards in room:", data.roomId);
       rooms[data.roomId].cards = data.cards;;
       socket.to(data.roomId).emit("cardsUpdated", { cards: data.cards });
       res({ success: true });

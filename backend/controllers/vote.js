@@ -16,7 +16,7 @@ function result(socket, data, estimations) {
   io.to(data.roomId).emit("voteResult", {
     votes: sortedVotes,
   });
-  console.log(sortedVotes);
+  // console.log(sortedVotes);
 }
 
 export function voteController(socket) {

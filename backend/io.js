@@ -20,7 +20,7 @@ export function initializeSocketHandlers(io) {
 
     const isHost = room.host === userId;
     room.users = (room.users || []).filter((user) => user.userId !== userId);
-    if (room.estimations) {
+    if (room.estimations && room.estimations[userId]) {
       delete room.estimations[userId];
     }
 
@@ -40,6 +40,7 @@ export function initializeSocketHandlers(io) {
   io.on("connection", (socket) => {
     console.log("A user connected", socket.id);
     users.set(socket.id, {connectedAt: new Date()});
+    socket.data.id = socket.id;
 
     roomController(socket);
 

@@ -1,4 +1,5 @@
 import { rooms } from "../io.js";
+import { io } from "../server.js";
 import { validateRoomExists } from "./common.js";
 
 const tempCards = [
@@ -29,7 +30,8 @@ export function roomController(socket) {
       rooms[roomId].revealed = false;
       rooms[roomId].resultCard = null;
       rooms[roomId].canVote = false;
-      socket.data = { roomId: roomId, name: user.name };
+      socket.data.roomId = roomId;
+      socket.data.name = user.name;
       socket.join(roomId);
       // socket.emit("roomCreated", { roomId });
       res({ success: true, roomId: roomId });
@@ -86,11 +88,8 @@ export function roomController(socket) {
         name: data.user.name,
         isVoted: false,
       });
-      socket.data = {
-        roomId: data.roomId,
-        id: data.user.id,
-        name: data.user.name,
-      };
+      socket.data.roomId = data.roomId;
+      socket.data.name = data.user.name;
       socket.join(data.roomId);
       socket
         .to(data.roomId)
@@ -192,19 +191,31 @@ export function roomController(socket) {
     }
   });
 
-  socket.on("leaveRoom", (res) => {
+  socket.on("leaveRoom", (data, res) => {
     const { roomId, name, id } = socket.data;
+    console.log(roomId, name, id);
     if (!validateRoomExists(socket, roomId)) {
       res({ success: false, error: "Room does not exist" });
       return;
     }
     try {
+      socket.to(roomId).emit("userLeft", { name: name });
+      console.log(`User ${name} left room ${roomId}`);
       socket.leave(roomId);
       rooms[roomId].users = rooms[roomId].users.filter(
         (user) => user.id !== id
       );
-      socket.to(roomId).emit("userLeft", { name: name });
-      console.log(`User ${name} left room ${roomId}`);
+      
+      if (rooms[roomId].host === id) {
+        console.log("Host is leaving, closing room: ", roomId);
+        io.to(roomId).emit("roomClosed");
+        console.log(`Room ${roomId} closed as host left`);
+        delete rooms[roomId];
+      }
+      else if (rooms[roomId].users.length === 0) {
+        console.log("Last user left, deleting room: ", roomId);
+        delete rooms[roomId];
+      }
       res({ success: true });
     } catch (error) {
       console.error("Error leaving room:", error);
