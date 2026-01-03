@@ -201,6 +201,10 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       return;
     }
 
+    if (selectCard === card) {
+      return;
+    }
+
     
     socket.emit("vote", { roomId, user, vote: card }, (res: IResRoom) => {
       if (res.success) {
@@ -236,11 +240,37 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
     setShowEditCards(!showEditCards);
   }
 
-  function handleUpdateCard(cards: string[]) {
-    socket.emit("updateCards", { roomId, cards }, (res: { success: boolean; cards?: string[]; error?: string }) => {
+  function handleUpdateCard(inCards: string[]) {
+    if (!roomId) return;
+    if (host !== user.name) {
+      alert("Only the host can update the cards.");
+      return;
+    }
+    if (canVote || isRevealed) {
+      alert("Cannot update cards while voting is in progress or after reveal.");
+      return;
+    }
+
+    console.log("Current cards:", cards);
+    console.log("Updating cards to:", inCards);
+    if (inCards.length === cards.length) {
+      let allSame = true;
+      for (let i = 0; i < inCards.length; i++) {
+        if (inCards[i] !== cards[i]) {
+          allSame = false;
+          break;
+        }
+      }
+      if (allSame) {
+        setShowEditCards(false);
+        return;
+      }
+    }
+
+    socket.emit("updateCards", { roomId, cards: inCards }, (res: { success: boolean; cards?: string[]; error?: string }) => {
       if (res.success) {
         // console.log("Update cards:", cards);
-        setCards(cards);
+        setCards(inCards);
       } else {
         console.error("Error updating cards:", res.error);
         socket.emit("getCards", { roomId }, (res: { success: boolean; cards?: string[]; error?: string }) => {
@@ -254,6 +284,14 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
     });
 
     setShowEditCards(false);
+  }
+
+  // TODO delete this debug section
+  function addUser() {
+    if (!roomId) return;
+
+    setUsers(prev => [...prev, { name: `User${prev.length + 1}`, isVoted: true }]);
+    setEstimations(prev => [...prev, { name: `User${prev.length + 1}`, vote: "5" }]);
   }
 
   return (
@@ -273,10 +311,10 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
             <p>Host: {host}</p>
             <p>Users: {users.map(u => u.name).join(", ")}</p>
             <p>Can Vote: {canVote ? "Yes" : "No"} Revealed: {isRevealed ? "Yes" : "No"}</p>
-            <div>Estimations:</div>
+            {/* <div>Estimations:</div>
             {estimations ? estimations.map(estimation => (
               <div key={estimation.name}>{estimation.name}: {estimation.vote}</div>
-            )) : "No estimations yet"}
+            )) : "No estimations yet"} */}
             <div>Result Card:</div>
             {voteResult ? voteResult.map(([vote, count], index) => (
               <div key={index}>{vote}: {count}</div>
@@ -284,6 +322,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
           </div>
         ) : ""}
       </div>
+      <Button variant="outlined" onClick={addUser}>[Debug] Add User</Button>
       <Table
         users={users}
         estimations={estimations}
