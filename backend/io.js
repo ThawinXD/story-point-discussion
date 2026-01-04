@@ -51,8 +51,8 @@ export function initializeSocketHandlers(io) {
     cardController(socket);
 
     socket.on("disconnect", () => {
+      console.log(`user ${socket.data.name} disconnected`);
       cleanupSocket(socket);
-      console.log("User disconnected");
     });
   });
 }

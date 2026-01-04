@@ -52,8 +52,9 @@ export function roomController(socket) {
       return;
     }
 
+    socket.data.name = data.user.name;
+
     try {
-      // console.log("user", data.user);
       if (
         rooms[data.roomId].users.some(
           (u) => u.id === data.user.id && u.name === data.user.name
