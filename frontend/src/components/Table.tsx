@@ -1,11 +1,11 @@
-import { IEstimation, IRoomUser, IUser } from "@/interfaces";
+import { IEstimation, IRoomUser, IUser, IVoteResult } from "@/interfaces";
 import Player from "./Player";
 import { Button } from "@mui/material";
 import PlayerCard from "./playerCard";
 
 
 export default function Table(
-  { users, estimations, canVote, isRevealed, showEditCards, voteResult, host, user, onStartVote, onRevealCards, onResetVote, onEditCards }: { users: IRoomUser[]; estimations: IEstimation[]; canVote: boolean; isRevealed: boolean; showEditCards: boolean; voteResult: [string, number][]; host: string; user: IUser; onStartVote: Function; onRevealCards: Function; onResetVote: Function; onEditCards: Function }
+  { users, estimations, canVote, isRevealed, showEditCards, voteResult, host, user, onStartVote, onRevealCards, onResetVote, onEditCards }: { users: IRoomUser[]; estimations: IEstimation[]; canVote: boolean; isRevealed: boolean; showEditCards: boolean; voteResult: IVoteResult | null; host: string; user: IUser; onStartVote: Function; onRevealCards: Function; onResetVote: Function; onEditCards: Function }
 ) {
   const total = users.length;
   const width = 600;

@@ -16,7 +16,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
   const [canVote, setCanVote] = useState<boolean>(false);
   const [isRevealed, setIsRevealed] = useState<boolean>(false);
   const [estimations, setEstimations] = useState<IEstimation[]>([]);
-  const [voteResult, setVoteResult] = useState<[string, number][]>([]);
+  const [voteResult, setVoteResult] = useState<IVoteResult | null>(null);
   const [selectCard, setSelectCard] = useState<string>("");
   const [showEditCards, setShowEditCards] = useState<boolean>(false);
 
@@ -62,7 +62,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       
       setUsers(prev => prev.map(u => ({ ...u, isVoted: false })));
       setEstimations([]);
-      setVoteResult([]);
+      setVoteResult(null);
       setCanVote(true);
       setIsRevealed(false);
     };
@@ -74,7 +74,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       setIsRevealed(false);
       setUsers(prev => prev.map(u => ({ ...u, isVoted: false })));
       setEstimations([]);
-      setVoteResult([]);
+      setVoteResult(null);
       setSelectCard("");
       setCanVote(false);
       setIsRevealed(false);
@@ -107,7 +107,7 @@ export default function RoomPageIn({ user, roomId }: { user: IUser; roomId: stri
       });
     };
     const onVoteResult = (voteResult: IVoteResult) => {
-      setVoteResult(voteResult.votes);
+      setVoteResult(voteResult);
     };
     const onCardsUpdated = (cards: string[]) => {
       setCards(cards);

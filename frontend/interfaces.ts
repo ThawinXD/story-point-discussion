@@ -28,7 +28,7 @@ export interface IRoom {
   canVote: boolean;
   revealed: boolean;
   estimations: IEstimation[];
-  voteResult: [string, number][];
+  voteResult: IVoteResult;
 }
 
 export interface IVoteResult {
