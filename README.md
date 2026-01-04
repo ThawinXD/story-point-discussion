@@ -2,13 +2,11 @@
 
 Estimation using Planning Poker!
 
-## Server REPL (dev)
-- Start backend: `cd story-point-discussion/backend && npm run dev`
-- When the server starts, a `server>` prompt appears.
-- Type expressions/functions and see results logged:
-	- `env` — view environment config
-	- `cmd.listRooms()` — list active room IDs
-	- `rooms` — inspect in-memory room state
-	- `cmd.emitToRoom('room123','newMessage',{ name:'Dev', message:'Hello'})`
+Using Next.js as a Frontend and Node.js as a Backend with Socket.io
 
-The REPL runs inside the server process; anything you call can interact with `io`, `rooms`, and `users`.
+You can clone repo to try it or visit the website: https://vercel.com/thawinxds-projects/planning-poker-frontend
+
+
+frontend repo: https://github.com/ThawinXD/planning-poker-frontend
+
+backend repo: https://github.com/ThawinXD/planning-poker-backend
